@@ -557,7 +557,8 @@ def recommend_movies_advanced(request):
 
                     print(f"Filtering by date range: {start_date} to {end_date}")  # Debugging
                     filtered_movies = [
-                        movie for movie in filtered_movies if start_date <= movie.release_date <= end_date
+                        movie for movie in filtered_movies
+                        if movie.release_date is not None and start_date <= movie.release_date <= end_date
                     ]
                     print(f"Movies found after filtering by date range: {len(filtered_movies)}")  # Debugging
                 except ValueError:
@@ -623,6 +624,7 @@ def recommend_movies_advanced(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method. Only POST is allowed."}, status=400)
+
 def movies_advance(request):
     # Fetch recommended movies from the session (if any)
     recommended_movies = request.session.get('recommend_movies_advanced', [])

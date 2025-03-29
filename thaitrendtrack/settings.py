@@ -150,6 +150,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 LOGOUT_REDIRECT_URL = 'homepage'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 django_heroku.settings(locals())
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

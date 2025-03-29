@@ -1,7 +1,10 @@
 import datetime
 import json
+
 from django.contrib.auth.models import User
 from django.db import models
+import torch
+from transformers import AutoTokenizer, AutoModel
 import numpy as np
 import pickle
 
@@ -16,6 +19,23 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+# ✅ โหลดโมเดล
+tokenizer = AutoTokenizer.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
+model = AutoModel.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
+model.eval()
+
+
+def get_embedding(text):
+    """แปลงข้อความเป็นเวกเตอร์ embedding"""
+    if not text or text.strip() == "":
+        return np.zeros((1, 768)).tolist()
+
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    return outputs.last_hidden_state[:, 0, :].squeeze(0).numpy().tolist()
 
 
 class Movie(models.Model):

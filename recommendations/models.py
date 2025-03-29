@@ -3,7 +3,6 @@ import json
 
 from django.contrib.auth.models import User
 from django.db import models
-import torch
 from transformers import AutoTokenizer, AutoModel
 import numpy as np
 import pickle
@@ -39,13 +38,15 @@ model.eval()
 
 def get_embedding(text):
     """แปลงข้อความเป็นเวกเตอร์ embedding"""
-    import torch
-    from transformers import AutoTokenizer, AutoModel
+    try:
+        import torch
+        from transformers import AutoTokenizer, AutoModel
+    except ImportError:
+        return np.zeros((1, 768)).tolist()  # fallback เผื่อรันใน production ที่ไม่มี torch
 
     if not text or text.strip() == "":
         return np.zeros((1, 768)).tolist()
 
-    # โหลดโมเดลภายในฟังก์ชัน (จะโหลดแค่ตอนเรียกใช้จริงๆ)
     tokenizer = AutoTokenizer.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
     model = AutoModel.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
     model.eval()

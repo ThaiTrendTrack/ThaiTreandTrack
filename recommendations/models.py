@@ -42,7 +42,8 @@ def get_embedding(text):
         import torch
         from transformers import AutoTokenizer, AutoModel
     except ImportError:
-        return np.zeros((1, 768)).tolist()  # fallback เผื่อรันใน production ที่ไม่มี torch
+        print("⚠️ transformers or torch not found — skipping embedding")
+        return np.zeros((1, 768)).tolist()
 
     if not text or text.strip() == "":
         return np.zeros((1, 768)).tolist()

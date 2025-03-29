@@ -1,1 +1,3 @@
-web: gunicorn cool_counters.wsgi:application --log-file -
+web: gunicorn thaitrendtrack.wsgi:application --log-file -
+
+

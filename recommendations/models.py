@@ -27,10 +27,28 @@ model = AutoModel.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
 model.eval()
 
 
+# def get_embedding(text):
+#     """แปลงข้อความเป็นเวกเตอร์ embedding"""
+#     if not text or text.strip() == "":
+#         return np.zeros((1, 768)).tolist()
+#
+#     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+#     with torch.no_grad():
+#         outputs = model(**inputs)
+#     return outputs.last_hidden_state[:, 0, :].squeeze(0).numpy().tolist()
+
 def get_embedding(text):
     """แปลงข้อความเป็นเวกเตอร์ embedding"""
+    import torch
+    from transformers import AutoTokenizer, AutoModel
+
     if not text or text.strip() == "":
         return np.zeros((1, 768)).tolist()
+
+    # โหลดโมเดลภายในฟังก์ชัน (จะโหลดแค่ตอนเรียกใช้จริงๆ)
+    tokenizer = AutoTokenizer.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
+    model = AutoModel.from_pretrained("MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
+    model.eval()
 
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():

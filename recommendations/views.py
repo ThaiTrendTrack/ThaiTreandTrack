@@ -827,6 +827,7 @@ def update_profile(request):
 #         'posts': posts,
 #         'selected_club': selected_club,
 #     })
+#
 
 @login_required
 def community_home(request):

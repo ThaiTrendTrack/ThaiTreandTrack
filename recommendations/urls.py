@@ -12,7 +12,7 @@ urlpatterns = [
     path('recommend/', views.recommend, name='recommend'),
     path('login/', custom_login, name='login'),
     path('signup/', views.signup, name='signup'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', views.homepage, name='homepage'),
     path('homepage/', views.homepage, name='homepage'),
     path('admin/', admin.site.urls),
@@ -35,7 +35,7 @@ urlpatterns = [
     path('delete_comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
     path('recommend_advanced/', views.recommend_movies_advanced, name='recommend_advanced'),
     path('movies_advance/', views.movies_advance, name='movies_advance'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('poll/<int:post_id>/vote/', views.vote, name='vote'),
     path('poll/<int:poll_id>/vote/', views.vote, name='vote'),
     path('poll/<int:poll_id>/results/', views.poll_results, name='poll_results'),
@@ -44,5 +44,6 @@ urlpatterns = [
     path('vote_poll/<int:post_id>/', views.vote_poll, name='vote_poll'),
     path('search_movies_by_title/', views.search_movie_by_title, name='search_movies_by_title'),
     path('logout/', views.logout_view, name='logout'),
+    path('search_movies_by_titles', views.search_movies_by_titles, name='search_movies_by_titles'),
 
        ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

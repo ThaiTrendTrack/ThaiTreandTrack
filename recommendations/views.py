@@ -638,16 +638,56 @@ def movies_advance(request):
 
 
 def homepage(request):
-    movies = Movie.objects.filter(content_type="Movie")[:10]
-    series = Movie.objects.filter(content_type="TV Series")[:10]
+    movies = Movie.objects.filter(content_type="Movie")[:5]
+    series = Movie.objects.filter(content_type="TV Series")[:5]
+    dramas = Movie.objects.filter(content_type="TV Series")[5:10]
 
     print("Movies in context:", movies.count())
     print("Series in context:", series.count())  # ✅ Debug
 
     return render(request, 'homepage.html', {
         'movies': movies,
-        'series': series
+        'series': series,
+        'dramas': dramas,
     })
+
+
+def search_movies_by_titles(request):
+    query = request.GET.get('qu', '')
+
+    movies_search = []
+    movies_search.extend(Movie.objects.filter(content_type="Movie")[:100])  # Add movies
+    movies_search.extend(Movie.objects.filter(content_type="TV Series")[:100])  # Add series
+
+    movies_name = []
+    for movie in movies_search:
+        movies_name.append(movie.title_en)
+        movies_name.append(movie.title_th)
+
+    result = search_similar_words(query, movies_name)
+
+    movies_result = []
+    for movie in movies_search:
+        if movie.title_en in result:
+            movies_result.append(movie)
+        elif movie.title_th in result:
+            movies_result.append(movie)
+
+    return render(request, 'search.html', {
+        'movies': movies_result
+    })
+
+
+# TODO:
+# find algorithm for acc
+# using lowercase
+def search_similar_words(query, words):
+    query_set = set(query)  # Convert query to a set of characters
+
+    # Filter words that contain all query characters
+    result = [word for word in words if query_set.issubset(set(word))]
+
+    return result
 
 
 ALL_GENRES = [

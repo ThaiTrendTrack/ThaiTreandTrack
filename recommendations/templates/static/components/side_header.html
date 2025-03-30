@@ -415,13 +415,13 @@
       </div>
 
 <div class="search-container">
-    <form action="{% url 'search_movies_by_title' %}" method="get" class="search-bar">
-        <input type="text" class="search-input" name="searchQuery" placeholder="Search..." required>
-        <button type="submit" class="search-button">
-            <span class="material-symbols-outlined">search</span>
-        </button>
-    </form>
-</div>
+        <form id="searchForm" class="search-bar" action="/search_movies_by_titles" method="GET">
+            <input type="text" class="search-input" name="qu" id="searchQuery" placeholder="Search..." required>
+            <button type="submit" class="search-button">
+                <span class="material-symbols-outlined">search</span>
+            </button>
+        </form>
+      </div>
 
 
 

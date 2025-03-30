@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-import django_heroku
-import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +25,7 @@ SECRET_KEY = 'django-insecure-v-#0az9st(g&+1*y(7jwbid4x=dwtdj=l#0xo*huo2)xe5booz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 APPEND_SLASH = False
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -77,24 +75,12 @@ WSGI_APPLICATION = 'thaitrendtrack.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-if os.getenv('ON_HEROKU'):
-    DATABASES = {
-        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
@@ -134,11 +120,11 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-# STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = [BASE_DIR / "recommendations/templates/static",
-#                     BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "recommendations/templates/static",
+                    BASE_DIR / "static"]
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/homepage/'
@@ -161,10 +147,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CORS_ALLOW_ALL_ORIGINS = True
 
 LOGOUT_REDIRECT_URL = 'homepage'
-
-django_heroku.settings(locals())
-
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-STATICFILES_DIRS = [BASE_DIR / "static"]

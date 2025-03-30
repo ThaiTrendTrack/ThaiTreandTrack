@@ -1,6 +1,0 @@
-*.pkl
-*.csv
-*.sqlite3
-media/
-profile_pics/
-recommendations/templates/static/*

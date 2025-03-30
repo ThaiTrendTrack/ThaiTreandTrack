@@ -3,13 +3,14 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login as auth_login, logout
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from datetime import datetime
 
 import json
 import torch
+from django.views.decorators.http import require_POST
 from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -180,9 +181,48 @@ def signup_view(request):
     return render(request, 'signup.html')
 
 
+# def movie_detail(request, movie_id):
+#     movie = get_object_or_404(Movie, id=movie_id)
+#     return render(request, 'movies_detailed.html', {'movie': movie})
+
+@csrf_protect
+@login_required
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
-    return render(request, 'movies_detailed.html', {'movie': movie})
+
+    # ✅ หา Post ที่ผูกกับหนังนี้
+    post, created = Post.objects.get_or_create(movie=movie, defaults={
+        'user': request.user,
+        'content': '',
+        'community': None  # ✅ ชัดเจนว่าโพสต์นี้ไม่เกี่ยวกับ Community
+    })
+
+    post.views += 1
+    post.save(update_fields=['views'])
+
+    # ✅ จัดการคอมเมนต์
+    if request.method == 'POST' and 'user_comment' in request.POST:
+        content = request.POST.get('user_comment')
+        if content.strip():
+            Comment.objects.create(post=post, user=request.user, content=content)
+            return redirect('movie_detail', movie_id=movie.id)
+
+    # ✅ ค่าต่าง ๆ
+    likes_count = post.likes.count()
+    comments = post.comments.all().order_by('-created_at')
+    comments_count = comments.count()
+    views = post.views
+    engagement = likes_count + comments_count + views
+
+    return render(request, 'movies_detailed.html', {
+        'movie': movie,
+        'post': post,
+        'likes_count': likes_count,
+        'comments': comments,
+        'comments_count': comments_count,
+        'views': views,
+        'engagement': engagement,
+    })
 
 
 GENRE_MAPPING = {
@@ -868,6 +908,7 @@ def update_profile(request):
 #     })
 #
 
+
 @login_required
 def community_home(request):
     selected_club = request.GET.get('club')
@@ -878,6 +919,18 @@ def community_home(request):
     if selected_club:
         community = get_object_or_404(Community, name=selected_club)
         posts = Post.objects.filter(community=community).order_by('-created_at')
+
+    # ✅ เพิ่ม session-based view tracking
+    viewed_post_ids = request.session.get('viewed_posts', [])
+
+    for post in posts:
+        if post.id not in viewed_post_ids:
+            post.views += 1
+            post.save(update_fields=['views'])
+
+            viewed_post_ids.append(post.id)  # บันทึกว่า user เห็นโพสต์นี้แล้ว
+
+    request.session['viewed_posts'] = viewed_post_ids  # อัปเดต session
 
     if request.method == 'POST':
         # Handle comment submission
@@ -894,57 +947,48 @@ def community_home(request):
         community_id = request.POST.get('community_id')
         community = get_object_or_404(Community, id=community_id)
 
-        # Handle Hashtag Creation
-        hashtags_input = request.POST.get('hashtags')  # Get the hashtags input as a comma-separated string
-        hashtags = [Hashtag.objects.get_or_create(name=tag.strip())[0] for tag in
-                    hashtags_input.split(',')]  # Create or get existing hashtags
+        hashtags_input = request.POST.get('hashtags')
+        hashtags = [Hashtag.objects.get_or_create(name=tag.strip())[0] for tag in hashtags_input.split(',')]
 
-        # Create the post
         new_post = Post.objects.create(
             community=community,
             user=request.user,
             content=content,
             image=image
         )
-
-        # Assign hashtags to the post
         new_post.hashtags.set(hashtags)
-        new_post.save()
 
-        # Handle Poll Creation
         poll_question = request.POST.get('poll_question')
-        poll_choices_raw = request.POST.get('poll_choices')  # รับค่าเป็นสตริง
+        poll_choices_raw = request.POST.get('poll_choices')
         poll_choices = [choice.strip() for choice in poll_choices_raw.split(',') if choice.strip()]
         for key in request.POST:
             if key.startswith("poll_choice_"):
                 poll_choices.append(request.POST[key])
 
-        # If poll question and choices are provided, create a new poll
         if poll_question and poll_choices:
             poll = Poll.objects.create(
                 question=poll_question,
-                choices=poll_choices  # Store choices as a list
+                choices=poll_choices
             )
             new_post.poll = poll
             new_post.save()
 
         return redirect('community_home')
 
-    # Calculate vote counts and percentages for each post with polls
+    # ✅ คำนวณโหวต
     for post in posts:
         if post.poll:
             vote_counts = {choice: post.poll.votes.filter(choice=choice).count() for choice in post.poll.choices}
             total_votes = sum(vote_counts.values())
 
-            # Calculate vote percentages
-            vote_percentages = {choice: (count / total_votes * 100 if total_votes > 0 else 0) for choice, count in
-                                vote_counts.items()}
+            vote_percentages = {
+                choice: (count / total_votes * 100 if total_votes > 0 else 0)
+                for choice, count in vote_counts.items()
+            }
 
-            # Find the leading choice and its percentage
             leading_choice = max(vote_percentages, key=vote_percentages.get, default=None)
             leading_percent = vote_percentages.get(leading_choice, 0)
 
-            # Add vote counts and percentages to the post
             post.poll.vote_counts = vote_counts
             post.poll.vote_percentages = vote_percentages
             post.poll.leading_choice = leading_choice
@@ -955,6 +999,10 @@ def community_home(request):
         'posts': posts,
         'selected_club': selected_club,
     })
+
+@property
+def engagement_score(self):
+    return self.likes.count() + self.comments.count() + self.views  # หรือปรับ weight ตามต้องการ
 
 
 @login_required
@@ -1034,6 +1082,14 @@ def delete_comment(request, comment_id):
 
         return JsonResponse({'error': 'You can only delete your own comments'}, status=403)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+@require_POST
+def delete_comment_detail(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user:
+        comment.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'movie_detail'))
 
 
 # View to delete post

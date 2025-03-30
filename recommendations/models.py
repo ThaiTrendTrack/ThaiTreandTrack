@@ -130,19 +130,21 @@ class Poll(models.Model):
         return max(vote_percentages, key=vote_percentages.get), max(vote_percentages.values())
 
 
-
 class Post(models.Model):
-    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, null=True, blank=True)  # ทำให้ไม่จำเป็นต้องมี
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True, blank=True)  # ✅ ใหม่: ผูกกับหนังได้
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     image = models.ImageField(upload_to='post_images/', null=True, blank=True)
     hashtags = models.ManyToManyField(Hashtag, related_name='posts', blank=True)
     poll = models.OneToOneField(Poll, on_delete=models.CASCADE, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Add created_at field
-    likes = models.ManyToManyField(User, related_name="liked_posts", blank=True)  # New field for likes
+    created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name="liked_posts", blank=True)
+    views = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.content
+
 
 
 class Vote(models.Model):

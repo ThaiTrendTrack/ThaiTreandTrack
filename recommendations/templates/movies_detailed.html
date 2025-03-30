@@ -686,83 +686,80 @@
                        <div class="comment-section">
                            <div class="comment-title">
                                <div class="stats">
-                                   <button class="fav PLACEHOLDER_IS_FAVORITE_CLASS black-text" id="favoriteButton"
-                                           data-model="character" data-object-id="PLACEHOLDER_CHARACTER_ID">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="32" height="32">
-                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                            </svg>
-                                   </button>
-                                   <h3 class="black-text">97</h3>
+                                <!-- ❤️ Likes -->
+                                <button class="fav {% if user in post.likes.all %}is-favorite{% endif %} black-text" id="favoriteButton">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="32" height="32">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                                                 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09
+                                                 C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42
+                                                 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </button>
+                                <h3 class="black-text">{{ likes_count }}</h3>
 
-                                   <img src="{% static 'icons/blog.png' %}" alt="comments-icon" class="comments-icon">
-                                   <h3 class="black-text">23</h3>
+                                <!-- 💬 Comments -->
+                                <img src="{% static 'icons/blog.png' %}" alt="comments-icon" class="comments-icon">
+                                <h3 class="black-text">{{ comments|length }}</h3>
 
-                                   <img src="{% static 'icons/bar-chart.png' %}" alt="engage-icon" class="views-icon">
-                                   <h3 class="black-text">1987</h3>
-                               </div>
+                                <!-- 📊 Engagement -->
+                                <img src="{% static 'icons/bar-chart.png' %}" alt="engage-icon" class="views-icon">
+                                <h3 class="black-text">{{ engagement }}</h3>
+                            </div>
+
                            </div>
-                           <div class="comment-form">
-                               <img src=" {% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                               <form method="post" class="flex align-items-center" id="commentForm">
-                                   <input type="text" name="user_comment" placeholder="Add a comment..." class="comment-input">
-                                   <button type="submit" class="comment-submit">
-                                       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-                                           <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"></path>
-                                       </svg>
-                                   </button>
-                               </form>
-                           </div>
+                           <!-- ✅ Comment Form -->
+                    <div class="comment-form" style="display: flex; align-items: center; gap: 10px; margin-top: 20px;">
+                      <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account"
+                           style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; padding: 2px; background-color: #DC0856;" />
 
-                           <div class="comment-box">
-                               <!-- Example comment -->
-                               <div class="comment">
-                                   <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                                   <div class="comment-text black-text">
-                                       <div class="comment-detail flex">
-                                           <p class="username-text">Jetaime_op</p>
-                                           <p class="datetime-text">7:44 PM · Dec 23, 2024 </p>
-                                       </div>
-                                       <div class="comment-body">love this movie!!</div>
-                                   </div>
+                      <form method="POST" id="commentForm" style="flex: 1; display: flex; align-items: center;">
+                        {% csrf_token %}
+                        <input type="text" name="user_comment" placeholder="Add a comment..." required
+                               style="flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ccc; font-size: 14px;" />
+                        <button type="submit" style="background: none; border: none; cursor: pointer; padding: 5px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20">
+                            <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
+                          </svg>
+                        </button>
+                      </form>
+                    </div>
 
-                                   <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                                   <div class="comment-text black-text">
-                                       <div class="comment-detail flex">
-                                           <p class="username-text">junior.np</p>
-                                           <p class="datetime-text">8:09 PM · Dec 23, 2024 </p>
-                                       </div>
-                                       <div class="comment-body">love this movie!!</div>
-                                   </div>
+                    <!-- ✅ Comment Box -->
+                    <div class="comment-box" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                      {% if comments %}
+                        {% for comment in comments %}
+                          <div class="comment" style="display: flex; align-items: flex-start; gap: 10px; background: #f8f8f8; padding: 10px; border-radius: 10px;">
 
-                                   <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                                   <div class="comment-text black-text">
-                                       <div class="comment-detail flex">
-                                           <p class="username-text">TadThpn</p>
-                                           <p class="datetime-text">8:21 PM · Dec 23, 2024 </p>
-                                       </div>
-                                       <div class="comment-body">love this movie!!</div>
-                                   </div>
+                            <!-- รูปโปรไฟล์ -->
+                            <img src="{% static 'icons/user.png' %}" alt="Profile Photo"
+                                 style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid black; padding: 2px; background-color: #DC0856;" />
 
-                                   <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                                   <div class="comment-text black-text">
-                                       <div class="comment-detail flex">
-                                           <p class="username-text">tanont916</p>
-                                           <p class="datetime-text">8:32 PM · Dec 23, 2024 </p>
-                                       </div>
-                                       <div class="comment-body">love this movie!!</div>
-                                   </div>
+                            <!-- เนื้อหาคอมเมนต์ -->
+                            <div class="comment-text black-text" style="flex: 1;">
+                              <div class="comment-detail" style="display: flex; gap: 10px; align-items: center; font-size: 14px;">
+                                <p class="username-text" style="font-weight: bold; margin: 0;">{{ comment.user.username }}</p>
+                                <p class="datetime-text" style="color: #777; margin: 0;">{{ comment.created_at|date:"g:i A · M d, Y" }}</p>
+                              </div>
+                              <div class="comment-body" style="margin-top: 4px; font-size: 14px;">{{ comment.content }}</div>
 
-                                   <img src="{% static 'icons/user.png' %}" alt="Profile Photo" class="account">
-                                   <div class="comment-text black-text">
-                                       <div class="comment-detail flex">
-                                           <p class="username-text">_pawwie00</p>
-                                           <p class="datetime-text">8:53 PM · Dec 23, 2024 </p>
-                                       </div>
-                                       <div class="comment-body">love this movie!!</div>
-                                   </div>
-                               </div>
-                           </div>
-                       </div>
+                              <!-- ปุ่มลบ (เฉพาะเจ้าของคอมเมนต์) -->
+                              {% if comment.user == request.user %}
+                              <form method="POST" action="{% url 'delete_comment' comment.id %}" style="margin-top: 10px;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; cursor: pointer;">
+                                  <i class="fas fa-trash" style="color: #DC0856; font-size: 18px;"></i>
+                                </button>
+                              </form>
+                            {% endif %}
+                            </div>
+
+                          </div>
+                        {% endfor %}
+                      {% else %}
+                        <p class="black-text">No comments yet.</p>
+                      {% endif %}
+                    </div>
+                     </div>
                    </div>
                </section>
 

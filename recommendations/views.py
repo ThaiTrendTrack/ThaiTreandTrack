@@ -678,7 +678,6 @@ def search_movies_by_titles(request):
     })
 
 
-# TODO:
 # find algorithm for acc
 # using lowercase
 def search_similar_words(query, words):

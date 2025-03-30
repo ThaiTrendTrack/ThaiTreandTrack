@@ -147,14 +147,14 @@ a {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
     background-color: white;
-    width: 150px;
-    height: auto;
-    text-align: left;
-    padding: 20px;
-    margin: 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 100%; /* ⭐ ทำให้สูงสุดเท่ากัน */
 }
+
 
 .movie-image {
     position: relative;
@@ -172,10 +172,19 @@ a {
 }
 
 .movie-title {
-    margin: 10px 0 5px;
-    font-size: 1rem;
-    font-weight: bolder;
+    margin: 10px 0 5px !important;
+    font-size: 1rem !important;
+    font-weight: bolder !important;
+    height: 3em !important;          /* กำหนดความสูงคงที่สำหรับ 2 บรรทัด */
+    line-height: 1.5em !important;     /* ระยะห่างแต่ละบรรทัด */
+    overflow: hidden !important;       /* ซ่อนข้อความส่วนที่เกินออกไป */
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;   /* จำกัดให้แสดงสูงสุด 2 บรรทัด */
+    -webkit-box-orient: vertical !important;
 }
+
+
 
 .movie-subtitle {
     margin: 0 0 5px;

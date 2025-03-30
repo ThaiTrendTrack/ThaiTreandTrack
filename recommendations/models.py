@@ -146,7 +146,6 @@ class Post(models.Model):
         return self.content
 
 
-
 class Vote(models.Model):
     poll = models.ForeignKey(Poll, related_name="votes", on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

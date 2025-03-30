@@ -62,7 +62,8 @@
             border-radius: 8px;
             padding: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+            height: 100%; /* ⭐ ทำให้สูงสุดเท่ากัน */
+            }
 
         .movie-image {
             position: relative;
@@ -102,6 +103,12 @@
             margin: 10px 0 5px;
             font-size: 1rem;
             font-weight: bolder;
+            height: 3em;               /* ⭐ Fix สูงไว้ให้พอดี 2 บรรทัด */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;     /* ⭐ จำกัดแค่ 2 บรรทัด */
+            -webkit-box-orient: vertical;
         }
 
         .movie-subtitle {
@@ -147,6 +154,10 @@
             </div>
             {% endfor %}
         </div>
+                <form action="{% url 'clear_preferences' %}" method="get">
+          <button type="submit" class="btn btn-outline-danger">🔁 เปลี่ยนแนวหนัง</button>
+        </form>
+
     </div>
 
     <script>

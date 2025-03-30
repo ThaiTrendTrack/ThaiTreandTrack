@@ -314,71 +314,128 @@ def preferences(request):
 
 
 # @csrf_exempt
+# def recommend(request):
+#     if request.method == "POST":
+#         print("Received POST request.")
+#
+#         # Retrieve the selected genres from POST data
+#         selected_genres = request.POST.getlist('genres[]')
+#         if not selected_genres:
+#             print("No genres selected.")
+#             return redirect('preferences')
+#
+#         print(f"Selected genres (English): {selected_genres}")
+#
+#         # Convert English genres to Thai using GENRE_MAPPING
+#         selected_genres_translated = [
+#             GENRE_MAPPING.get(genre, genre) for genre in selected_genres
+#         ]
+#         print(f"Translated genres (Thai): {selected_genres_translated}")
+#
+#         # Retrieve all movies and filter them manually by genres
+#         all_movies = Movie.objects.all()
+#         filtered_movies = []
+#
+#         # Check each movie's genres and log all genre data
+#         for movie in all_movies:
+#             print(f"Movie: {movie.title_en}, Genres: {movie.genres}")  # Debugging line
+#
+#             # Ensure movie genres are stored as strings, split if necessary
+#             movie_genres = movie.genres  # Assuming `movie.genres` is a list of genre names as strings
+#
+#             # Check that genres are stored as a list of full strings
+#             if isinstance(movie_genres, str):
+#                 movie_genres = [genre.strip() for genre in movie_genres.split(',')]  # Split genres by comma if needed
+#
+#             for genre in movie_genres:
+#                 print(f"Comparing full genre '{genre}' with selected genres...")
+#                 if genre in selected_genres_translated:
+#                     print(f"Match found! Movie {movie.title_en} contains genre '{genre}'")
+#                     filtered_movies.append(movie)
+#                     break  # Break once we find a match for efficiency
+#
+#         print(f"Found {len(filtered_movies)} movies matching the selected genres.")
+#
+#         if not filtered_movies:
+#             print("No movies found for the selected genres. Please check genre data.")
+#
+#         # Sort filtered movies by popularity, vote_average, and release_date (descending)
+#         filtered_movies.sort(key=lambda x: (
+#             -x.popularity if x.popularity else 0,
+#             -x.vote_average if x.vote_average else 0,
+#             # Convert date to datetime for sorting by release date
+#             datetime.combine(x.release_date, datetime.min.time()) if x.release_date else datetime.min
+#         ))
+#
+#         # Limit to the top 10 recommended movies
+#         recommended_movies = filtered_movies[:10]
+#
+#         print(f"Top 10 recommended movies: {[movie.title_en for movie in recommended_movies]}")
+#
+#         return render(request, 'movies.html', {
+#             'movies': recommended_movies,
+#             'selected_genres': selected_genres,
+#         })
+#
+#     print("Redirecting to preferences.")
+#     return redirect('preferences')
+
 def recommend(request):
     if request.method == "POST":
-        print("Received POST request.")
-
-        # Retrieve the selected genres from POST data
+        # ✅ Get genres from POST
         selected_genres = request.POST.getlist('genres[]')
         if not selected_genres:
-            print("No genres selected.")
             return redirect('preferences')
 
-        print(f"Selected genres (English): {selected_genres}")
+        # ✅ Save to session
+        request.session['selected_genres'] = selected_genres
+        return redirect('recommend')  # Redirect back to self as GET
 
-        # Convert English genres to Thai using GENRE_MAPPING
-        selected_genres_translated = [
-            GENRE_MAPPING.get(genre, genre) for genre in selected_genres
-        ]
-        print(f"Translated genres (Thai): {selected_genres_translated}")
+    # ✅ GET Method - check session
+    selected_genres = request.session.get('selected_genres')
 
-        # Retrieve all movies and filter them manually by genres
-        all_movies = Movie.objects.all()
-        filtered_movies = []
+    if not selected_genres:
+        return redirect('preferences')
 
-        # Check each movie's genres and log all genre data
-        for movie in all_movies:
-            print(f"Movie: {movie.title_en}, Genres: {movie.genres}")  # Debugging line
+    # ✅ แปลงเป็นภาษาไทย
+    selected_genres_translated = [
+        GENRE_MAPPING.get(genre, genre) for genre in selected_genres
+    ]
 
-            # Ensure movie genres are stored as strings, split if necessary
-            movie_genres = movie.genres  # Assuming `movie.genres` is a list of genre names as strings
+    # ✅ คัดกรองหนัง
+    all_movies = Movie.objects.all()
+    filtered_movies = []
 
-            # Check that genres are stored as a list of full strings
-            if isinstance(movie_genres, str):
-                movie_genres = [genre.strip() for genre in movie_genres.split(',')]  # Split genres by comma if needed
+    for movie in all_movies:
+        movie_genres = movie.genres
+        if isinstance(movie_genres, str):
+            movie_genres = [g.strip() for g in movie_genres.split(',')]
 
-            for genre in movie_genres:
-                print(f"Comparing full genre '{genre}' with selected genres...")
-                if genre in selected_genres_translated:
-                    print(f"Match found! Movie {movie.title_en} contains genre '{genre}'")
-                    filtered_movies.append(movie)
-                    break  # Break once we find a match for efficiency
+        for genre in movie_genres:
+            if genre in selected_genres_translated:
+                filtered_movies.append(movie)
+                break
 
-        print(f"Found {len(filtered_movies)} movies matching the selected genres.")
+    # ✅ จัดอันดับผลลัพธ์
+    filtered_movies.sort(key=lambda x: (
+        -x.popularity if x.popularity else 0,
+        -x.vote_average if x.vote_average else 0,
+        datetime.combine(x.release_date, datetime.min.time()) if x.release_date else datetime.min
+    ))
 
-        if not filtered_movies:
-            print("No movies found for the selected genres. Please check genre data.")
+    recommended_movies = filtered_movies[:10]
 
-        # Sort filtered movies by popularity, vote_average, and release_date (descending)
-        filtered_movies.sort(key=lambda x: (
-            -x.popularity if x.popularity else 0,
-            -x.vote_average if x.vote_average else 0,
-            # Convert date to datetime for sorting by release date
-            datetime.combine(x.release_date, datetime.min.time()) if x.release_date else datetime.min
-        ))
+    return render(request, 'movies.html', {
+        'movies': recommended_movies,
+        'selected_genres': selected_genres,
+    })
 
-        # Limit to the top 10 recommended movies
-        recommended_movies = filtered_movies[:10]
 
-        print(f"Top 10 recommended movies: {[movie.title_en for movie in recommended_movies]}")
-
-        return render(request, 'movies.html', {
-            'movies': recommended_movies,
-            'selected_genres': selected_genres,
-        })
-
-    print("Redirecting to preferences.")
+def clear_preferences(request):
+    if 'selected_genres' in request.session:
+        del request.session['selected_genres']
     return redirect('preferences')
+
 
 
 # Function to generate text embeddings

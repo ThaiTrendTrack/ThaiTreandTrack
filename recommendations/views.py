@@ -436,7 +436,8 @@ def clear_preferences(request):
         del request.session['selected_genres']
     return redirect('preferences')
 
-
+def side_header_view(request):
+    return render(request, 'side_header.html')
 
 # Function to generate text embeddings
 def get_embeddings(text):

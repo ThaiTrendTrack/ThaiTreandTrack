@@ -46,6 +46,5 @@ urlpatterns = [
     path('search_movies_by_title/', views.search_movie_by_title, name='search_movies_by_title'),
     path('logout/', views.logout_view, name='logout'),
     path('search_movies_by_titles', views.search_movies_by_titles, name='search_movies_by_titles'),
-    path('preferences/clear/', views.clear_preferences, name='clear_preferences'),
 
        ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
